@@ -1,3 +1,7 @@
+# This will download all the Connect 6 games for a player on Little Golem.
+#
+
+
 URL="https://www.littlegolem.net/jsp/info/player_game_list_txt.jsp?plid=${1}&gtid=connect6"
 curl -o${1}.tmp "${URL}"
 
