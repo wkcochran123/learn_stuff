@@ -18,6 +18,30 @@ def parse_board(board_string):
             board[i][j] = int(board_string[19*i+j])
     return board
 
+
+def board_to_html_table(board,variables):
+    ret = "<table border=0 padding=0 margin=0 bgcolor=D2B48C>"
+    i = 0
+    for x in board:
+        j = 0
+        ret = ret + "<tr>"
+        for y in x:
+            local_variables = "i={}&j={}".format(i,j)
+            ret = ret + "<td align=center valign=center>"
+            if y == 0:
+                ret = ret + "<font size=+2><pre> <a href=/?"+variables+local_variables+ \
+                            " style='text-decoration: none;'>＋</a> </pre></font>"
+            elif y < 3:
+                ret = ret + "<font color=000000 size=+3><pre> ● \n</pre></font>"
+            else:
+                ret = ret + "<font color=FFFFFF size=+3><pre> ● \n</pre></font>"
+            j = j + 1
+            ret = ret + "\n \n</a></pre></td>"
+        i = i + 1
+        ret = ret + "</tr>"
+    ret = ret + "</table>"
+    return ret
+
 def draw_board(board_string,i,j,side):
     
     board = []
@@ -41,29 +65,7 @@ def draw_board(board_string,i,j,side):
     variables = "side={}&".format(side) +     \
                 "board={}&".format(bval)
 
-    ret = "<table border=0 padding=0 margin=0>"
-    i = 0
-    for x in board:
-        j = 0
-        ret = ret + "<tr>"
-        for y in x:
-            local_variables = "i={}&j={}".format(i,j)
-            ret = ret + "<td>"
-            if y == 0:
-                ret = ret + "<pre>\n <a href=/?"+variables+local_variables+ \
-                            " style='text-decoration: none;'>+</a> \n\n</pre></a>"
-            elif y < 3:
-                ret = ret + "<pre>\n X \n\n</pre>"
-            else:
-                ret = ret + "<pre>\n O \n\n</pre>"
-            j = j + 1
-            ret = ret + "\n \n</a></pre></td>"
-        i = i + 1
-        ret = ret + "</tr>"
-
-    ret = ret + "</table>"
-    return ret
-
+    return board_to_html_table(board,variables)
 
 @app.route('/')
 def hello_world():
