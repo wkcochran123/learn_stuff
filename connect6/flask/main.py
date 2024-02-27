@@ -1,4 +1,7 @@
 import random
+import numpy as np
+import copy
+from tensorflow.keras.models import load_model
 
 from flask import Flask, request
 app = Flask(__name__)
@@ -86,45 +89,36 @@ def get_header():
     </head>
     """
 
-def compute_distance(stone_a, stone_b):
-    (x1,y1) = stone_a
-    (x2,y2) = stone_b
-    return abs(x2-x1) + abs(y1-y2)
-
-def compute_min_distance(stone,stones,threshold):
-    distance = 400 # This is far larger than the board
-    for other_stone in stones:
-        distance = min(distance, compute_distance(stone,other_stone))
-        if distance <= threshold:
-            return True
-    return False
-        
-
 def compute_move(board,side):
-    stones = []
-    i = 0
-    for x in board:
-        j = 0
-        for y in x:
-            if y != 0:
-                stones.append((i,j))
-        j = j + 1
-    i = i + 1
+    model = load_model("../notebooks/random_v_real")
 
-    options = []
-    i = 0
-    for x in board:
-        j = 0
-        for y in x:
-            if y == 0:
-                if compute_min_distance((i,j),stones,2):
-                    options.append((i,j))
-        j = j + 1
-    i = i + 1
+    redo_board = copy.deepcopy(board)
+    for x in range(19):
+        for y in range(19):
+            if board[x][y] > 0:
+                if board[x][y] < 3:
+                    redo_board[x][y] = 1
+                if board[x][y] > 2:
+                    redo_board[x][y] = -1
+    stone_val = 1 if side < 3 else -1
 
-    (i,j) = random.choice(options)
-    board[i][j] = side
+    selections=[]
+    predictions=[]
+    for x in range(19):
+        for y in range(19):
+            if board[x][y] == 0:
+                redo_board[x][y] = stone_val
+                data_np = np.array([redo_board])
+                prediction = model.predict(data_np)
+                if (prediction > 0.8):
+                    selections.append((x,y))
+                    predictions.append(prediction)
+                redo_board[x][y] = 0
 
+    print(selections)
+    print(predictions)
+    (x,y) = random.choice(selections)
+    board[x][y] = side
     side = increment_side(side)
     return (board,side)
     
